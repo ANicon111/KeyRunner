@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:keyrunner/definitions.dart';
 import 'package:keyrunner/texts.dart';
 
@@ -22,6 +22,7 @@ class Home extends StatelessWidget {
         ),
       ),
       home: const Scaffold(
+        resizeToAvoidBottomInset: false,
         body: NotTyperacer(),
       ),
     );
@@ -78,6 +79,8 @@ class _NotTyperacerState extends State<NotTyperacer> {
   bool gameOver = false;
   bool gameStarted = false;
   FocusNode focusNode = FocusNode();
+  FocusNode textFocusNode = FocusNode();
+  TextEditingController textController = TextEditingController(text: "`");
 
   @override
   Widget build(BuildContext context) {
@@ -94,6 +97,8 @@ class _NotTyperacerState extends State<NotTyperacer> {
     var wrong = text.substring(correctlen, correctlen + wronglen);
     var remaining = text.substring(correctlen + wronglen);
     return Center(
+      widthFactor: RelSize(context).vw / RelSize(context).vmin,
+      heightFactor: RelSize(context).vh / RelSize(context).vmin,
       child: SizedBox(
         width: 1080 * RelSize(context).pixel,
         height: 960 * RelSize(context).pixel,
@@ -154,94 +159,53 @@ class _NotTyperacerState extends State<NotTyperacer> {
             ),
             Positioned(
               bottom: 0,
-              child: KeyboardListener(
-                onKeyEvent: (value) {
-                  if (gameStarted &&
-                      gameOver &&
-                      value.logicalKey == LogicalKeyboardKey.space) {
-                    reset();
-                    return;
-                  }
-                  if (!gameStarted && value.character == text[0]) {
-                    setGameStart();
-                  }
-                  if (gameStarted &&
-                      !gameOver &&
-                      value.logicalKey != LogicalKeyboardKey.shiftLeft &&
-                      value.runtimeType == KeyDownEvent) {
-                    if (wronglen == 0) {
-                      totalPresses++;
-                      if (value.character == text[correctlen]) {
-                        correctlen++;
-                        if (correctlen == text.length) {
-                          setGameOver();
-                          return;
-                        }
-                      } else if (value.logicalKey !=
-                          LogicalKeyboardKey.backspace) {
-                        totalPresses++;
-                        wronglen++;
-                      }
-                    } else {
-                      if (value.logicalKey == LogicalKeyboardKey.backspace) {
-                        wronglen--;
-                      } else {
-                        if (correctlen + wronglen < text.length) {
-                          wronglen++;
-                        }
-                      }
-                    }
-                    setState(() {});
-                  }
-                },
-                focusNode: focusNode,
-                autofocus: true,
-                child: Container(
-                  color: Colors.white,
-                  width: 1080 * RelSize(context).pixel,
-                  height: 720 * RelSize(context).pixel,
-                  child: Padding(
-                    padding: EdgeInsets.all(10 * RelSize(context).pixel),
-                    child: Flex(
-                      direction: Axis.horizontal,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Flexible(
-                          child: RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: correct,
-                                  style: TextStyle(
-                                    color: Colors.green.shade700,
-                                    fontSize: 32 * RelSize(context).pixel,
-                                    backgroundColor: Colors.green.shade200,
-                                    fontFamily: "Hack",
-                                  ),
+              child: Container(
+                color: Colors.white,
+                width: 1080 * RelSize(context).pixel,
+                height: 720 * RelSize(context).pixel,
+                child: Padding(
+                  padding: EdgeInsets.all(10 * RelSize(context).pixel),
+                  child: Flex(
+                    direction: Axis.horizontal,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Flexible(
+                        child: RichText(
+                          textAlign: TextAlign.justify,
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: correct,
+                                style: TextStyle(
+                                  color: Colors.green.shade700,
+                                  fontSize: 32 * RelSize(context).pixel,
+                                  backgroundColor: Colors.green.shade200,
+                                  fontFamily: "Hack",
                                 ),
-                                TextSpan(
-                                  text: wrong,
-                                  style: TextStyle(
-                                    color: Colors.red.shade700,
-                                    fontSize: 32 * RelSize(context).pixel,
-                                    backgroundColor: Colors.red.shade200,
-                                    fontFamily: "Hack",
-                                  ),
+                              ),
+                              TextSpan(
+                                text: wrong,
+                                style: TextStyle(
+                                  color: Colors.red.shade700,
+                                  fontSize: 32 * RelSize(context).pixel,
+                                  backgroundColor: Colors.red.shade200,
+                                  fontFamily: "Hack",
                                 ),
-                                TextSpan(
-                                  text: remaining,
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 32 * RelSize(context).pixel,
-                                    fontFamily: "Hack",
-                                  ),
+                              ),
+                              TextSpan(
+                                text: remaining,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  backgroundColor: Colors.grey.shade200,
+                                  fontSize: 32 * RelSize(context).pixel,
+                                  fontFamily: "Hack",
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -286,6 +250,83 @@ class _NotTyperacerState extends State<NotTyperacer> {
                     ),
                   )
                 : Container(),
+            Positioned(
+              bottom: 0,
+              child: KeyboardListener(
+                onKeyEvent: (_) {
+                  textController.selection = TextSelection.collapsed(
+                      offset: textController.text.length);
+                },
+                focusNode: focusNode,
+                child: SizedBox(
+                  width: 1080 * RelSize(context).pixel,
+                  height: 720 * RelSize(context).pixel,
+                  child: TextField(
+                    enableInteractiveSelection: false,
+                    maxLines: 2,
+                    autofocus: true,
+                    focusNode: textFocusNode,
+                    style: const TextStyle(
+                      fontSize: 0,
+                    ),
+                    textAlign: TextAlign.justify,
+                    onChanged: (_) {
+                      String value = textController.value.text;
+                      if (kDebugMode) {
+                        print(value);
+                      }
+                      //start
+                      if (!gameStarted &&
+                          value.replaceFirst("`", "") == text[0]) {
+                        setGameStart();
+                      }
+                      //restart
+                      if (gameStarted &&
+                          gameOver &&
+                          value.replaceFirst("`", "") == " ") {
+                        reset();
+                      }
+                      //update and gameover
+                      if (gameStarted && !gameOver) {
+                        if (wronglen == 0) {
+                          if (value.replaceFirst("`", "") == text[correctlen] ||
+                              text[correctlen] == "\n" &&
+                                  value.replaceFirst("`", "") == " ") {
+                            totalPresses++;
+                            correctlen++;
+                            if (correctlen == text.length) {
+                              setGameOver();
+                            }
+                          } else if (value.isNotEmpty) {
+                            totalPresses++;
+                            wronglen++;
+                          }
+                        } else {
+                          if (value.isEmpty) {
+                            wronglen--;
+                          } else {
+                            if (correctlen + wronglen < text.length) {
+                              totalPresses++;
+                              wronglen++;
+                            }
+                          }
+                        }
+                        setState(() {});
+                      }
+                      textController.text = "`";
+                    },
+                    controller: textController,
+                    decoration: const InputDecoration(
+                      fillColor: Color.fromARGB(0, 0, 0, 0),
+                      focusColor: Color.fromARGB(0, 0, 0, 0),
+                      hoverColor: Color.fromARGB(0, 0, 0, 0),
+                      border: InputBorder.none,
+                    ),
+                    cursorWidth: 0,
+                  ),
+                ),
+              ),
+            )
           ],
         ),
       ),
