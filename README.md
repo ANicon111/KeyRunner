@@ -31,7 +31,7 @@
 <h3 align="center">Key Runner</h3>
 
   <p align="center">
-    A simple, keyboard only speed typing game. Text entries courtesy of ChatGPT :)
+    A minimalist speed typing game. Text entries courtesy of ChatGPT :)
     <br />
     <br />
     <a href="https://github.com/ANicon111/KeyRunner/issues">Report Bug</a>
