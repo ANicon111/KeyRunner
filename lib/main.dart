@@ -37,6 +37,21 @@ class NotTyperacer extends StatefulWidget {
 }
 
 class _NotTyperacerState extends State<NotTyperacer> {
+  Reaction _getReaction(int wpm, int acc) {
+    if (wpm > 250) wpm = 250;
+    if (wpm < 0) wpm = 0;
+    if (acc > 100) acc = 100;
+    if (acc < 0) acc = 0;
+    while (reactions[wpm] == null) {
+      wpm--;
+    }
+    while (reactions[wpm]?[acc] == null) {
+      acc--;
+    }
+    return reactions[wpm]![acc]![
+        Random().nextInt(reactions[wpm]?[acc]!.length ?? 0)];
+  }
+
   void setGameOver() {
     gameStarted = true;
     gameOver = true;
@@ -52,6 +67,10 @@ class _NotTyperacerState extends State<NotTyperacer> {
     totalPresses = 0;
     stopwatch.reset();
     text = entries[Random().nextInt(entries.length)];
+    if (kDebugMode) {
+      debugIndex = debugIndex % debugText.length;
+      text = debugText[debugIndex++];
+    }
     totallen = text.length;
     setState(() {});
   }
@@ -66,6 +85,10 @@ class _NotTyperacerState extends State<NotTyperacer> {
   @override
   void initState() {
     text = entries[Random().nextInt(entries.length)];
+    if (kDebugMode) {
+      debugIndex = debugIndex % debugText.length;
+      text = debugText[debugIndex++];
+    }
     totallen = text.length;
     super.initState();
   }
@@ -75,6 +98,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
   int correctlen = 0;
   int wronglen = 0;
   int totalPresses = 0;
+  int debugIndex = 0;
   Stopwatch stopwatch = Stopwatch();
   bool gameOver = false;
   bool gameStarted = false;
@@ -88,7 +112,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
     int words = correct.split(" ").length;
     double wpm = 0;
     if (stopwatch.elapsedMilliseconds > 100) {
-      wpm = words / stopwatch.elapsedMilliseconds * 60000;
+      wpm = 60000 * words / stopwatch.elapsedMilliseconds;
     }
     double acc = 0;
     if (totalPresses > 0) {
@@ -96,6 +120,10 @@ class _NotTyperacerState extends State<NotTyperacer> {
     }
     var wrong = text.substring(correctlen, correctlen + wronglen);
     var remaining = text.substring(correctlen + wronglen);
+    Reaction reaction = const Reaction("");
+    if (gameOver) {
+      reaction = _getReaction(wpm.toInt(), acc.toInt());
+    }
     return Center(
       widthFactor: RelSize(context).vw / RelSize(context).vmin,
       heightFactor: RelSize(context).vh / RelSize(context).vmin,
@@ -238,12 +266,28 @@ class _NotTyperacerState extends State<NotTyperacer> {
                       width: 1080 * RelSize(context).pixel,
                       height: 720 * RelSize(context).pixel,
                       child: Center(
-                        child: Text(
-                          "Press Space to play a new game",
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 32 * RelSize(context).pixel,
-                            fontFamily: "Hack",
+                        child: RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: reaction.text,
+                                style: TextStyle(
+                                  color: reaction.color,
+                                  fontSize: reaction.fontSize *
+                                      RelSize(context).pixel,
+                                  fontFamily: "Hack",
+                                ),
+                              ),
+                              TextSpan(
+                                text: "\n\nPress Space to play a new game",
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 32 * RelSize(context).pixel,
+                                  fontFamily: "Hack",
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),

@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 const List<String> entries = [
   "The five boxing wizards jump quickly.",
   "How vexingly quick daft zebras jump.",
@@ -98,4 +100,111 @@ const List<String> entries = [
   "Necessity is the mother of invention.",
   "Out of sight, out of mind.",
   "Rome wasn't built in a day.",
+  "Money can buy happiness.",
 ];
+
+const List<String> debugText = [
+  "  a",
+  "...",
+];
+
+class Reaction {
+  final String text;
+  final double fontSize;
+  final Color color;
+  const Reaction(this.text, [this.fontSize = 32, this.color = Colors.black]);
+}
+
+const Map<int, Map<int, List<Reaction>>> reactions = {
+  //wpm : { acc : [Reaction("reaction1"), Reaction("reaction2")]},
+  0: {
+    0: [
+      Reaction("ಠ⁠_⁠ಠ", 128, Colors.red),
+    ],
+  },
+  20: {
+    0: [
+      Reaction("Try to improve your accuracy."),
+      Reaction("Practice makes perfect, keep going!"),
+    ],
+    75: [
+      Reaction("Good effort, keep practicing for better speed and accuracy."),
+      Reaction("You're doing fine...", 64, Colors.deepOrange)
+    ],
+    100: [
+      Reaction(
+          "You have excellent accuracy, keep working on increasing your speed!"),
+      Reaction(
+          "Your accuracy is impressive, keep practicing for faster speeds!"),
+      Reaction("Great job on accuracy, now focus on increasing your speed!"),
+    ],
+  },
+  40: {
+    0: [
+      Reaction("Focus on improving your accuracy for better results."),
+      Reaction("You can do better, don't give up!"),
+    ],
+    75: [
+      Reaction("Nice work, keep practicing for better speed and accuracy."),
+      Reaction("You're doing well.", 64, Colors.orange)
+    ],
+    100: [
+      Reaction("Impressive accuracy and good speed, keep practicing."),
+      Reaction(
+          "Great job on accuracy and speed, keep practicing for even faster speeds!"),
+    ],
+  },
+  80: {
+    0: [
+      Reaction(
+          "Your speed is impressive, keep working on increasing your accuracy."),
+      Reaction("Great job on speed, keep practicing for even better accuracy!"),
+    ],
+    75: [
+      Reaction("o7", 128),
+      Reaction("You're very good!", 64, Color.fromARGB(255, 150, 161, 43)),
+    ],
+    100: [
+      Reaction("You're a typing pro, keep up the good work!"),
+      Reaction("🔥", 128),
+    ],
+  },
+  120: {
+    0: [
+      Reaction("How are you this fast, yet so inaccurate? 🤣"),
+      Reaction("Accuracy seems to be your only problem..."),
+    ],
+    75: [
+      Reaction("You're so close to the top...!"),
+      Reaction("This is amazing!", 64, Color.fromARGB(255, 154, 182, 52)),
+    ],
+    100: [
+      Reaction("You're a typing legend, keep up the amazing work!"),
+      Reaction("Incredible work on both speed and accuracy, well done!"),
+      Reaction("⭐", 128),
+    ],
+  },
+  160: {
+    0: [
+      Reaction(
+          "You're too fast considering how many mistakes you're making 🧐"),
+    ],
+    75: [
+      Reaction("This is almost perfect!", 64, Colors.green),
+      Reaction("⚡", 128, Colors.yellow),
+    ],
+    100: [
+      Reaction("You're a typing god, keep up the amazing work!"),
+      Reaction("Unbelievable work on both speed and accuracy, well done!"),
+      Reaction("👑", 192),
+    ],
+  },
+  250: {
+    0: [
+      Reaction("How did your friggin bot make any mistakes? 🤣"),
+    ],
+    100: [
+      Reaction("🧐", 128),
+    ],
+  },
+};
