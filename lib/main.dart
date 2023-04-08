@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:keyrunner/definitions.dart';
-import 'package:keyrunner/texts.dart';
+import 'package:keyrunner/data.dart';
 
 void main() {
   runApp(const Home());
@@ -65,6 +65,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
     correctlen = 0;
     wronglen = 0;
     totalPresses = 0;
+    combo = 0;
     stopwatch.reset();
     text = entries[Random().nextInt(entries.length)];
     if (kDebugMode) {
@@ -98,6 +99,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
   int correctlen = 0;
   int wronglen = 0;
   int totalPresses = 0;
+  int combo = 0;
   int debugIndex = 0;
   Stopwatch stopwatch = Stopwatch();
   bool gameOver = false;
@@ -124,75 +126,76 @@ class _NotTyperacerState extends State<NotTyperacer> {
     if (gameOver) {
       reaction = _getReaction(wpm.toInt(), acc.toInt());
     }
+    RelSize relSize = RelSize(context);
     return Center(
-      widthFactor: RelSize(context).vw / RelSize(context).vmin,
-      heightFactor: RelSize(context).vh / RelSize(context).vmin,
+      widthFactor: relSize.vw / relSize.vmin,
+      heightFactor: relSize.vh / relSize.vmin,
       child: SizedBox(
-        width: 1080 * RelSize(context).pixel,
-        height: 960 * RelSize(context).pixel,
+        width: 1080 * relSize.pixel,
+        height: 1080 * relSize.pixel,
         child: Stack(
           children: [
-            Cron(stopwatch: stopwatch),
+            Cron(
+              stopwatch: stopwatch,
+              relSize: relSize,
+            ),
             Positioned(
-              top: 90 * RelSize(context).pixel,
-              left: 350 * RelSize(context).pixel,
+              top: 90 * relSize.pixel,
+              left: 350 * relSize.pixel,
               child: Text(
                 "WPM:${wpm.toStringAsFixed(0)}",
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 32 * RelSize(context).pixel,
+                  fontSize: 32 * relSize.pixel,
                   fontFamily: "Hack",
                 ),
               ),
             ),
             Positioned(
-              top: 90 * RelSize(context).pixel,
-              right: 350 * RelSize(context).pixel,
+              top: 90 * relSize.pixel,
+              right: 350 * relSize.pixel,
               child: Text(
                 "ACC:${acc.toStringAsFixed(2)}%",
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 32 * RelSize(context).pixel,
+                  fontSize: 32 * relSize.pixel,
                   fontFamily: "Hack",
                 ),
               ),
             ),
             Positioned(
-              top: 160 * RelSize(context).pixel,
+              top: 160 * relSize.pixel,
               child: Row(
                 children: [
                   Container(
-                    height: 80 * RelSize(context).pixel,
-                    width:
-                        1080 * RelSize(context).pixel * correctlen / totallen,
+                    height: 80 * relSize.pixel,
+                    width: 1080 * relSize.pixel * correctlen / totallen,
                     color: Colors.green,
                   ),
                   Container(
-                    height: 80 * RelSize(context).pixel,
-                    width: 1080 *
-                        RelSize(context).pixel *
-                        (1 - correctlen / totallen),
+                    height: 80 * relSize.pixel,
+                    width: 1080 * relSize.pixel * (1 - correctlen / totallen),
                     color: Colors.red,
                   )
                 ],
               ),
             ),
             Positioned(
-              top: 160 * RelSize(context).pixel,
-              left: 1000 * RelSize(context).pixel * correctlen / totallen,
+              top: 160 * relSize.pixel,
+              left: 1000 * relSize.pixel * correctlen / totallen,
               child: Icon(
                 Icons.abc,
-                size: RelSize(context).pixel * 80,
+                size: relSize.pixel * 80,
               ),
             ),
             Positioned(
-              bottom: 0,
+              bottom: 120 * relSize.pixel,
               child: Container(
                 color: Colors.white,
-                width: 1080 * RelSize(context).pixel,
-                height: 720 * RelSize(context).pixel,
+                width: 1080 * relSize.pixel,
+                height: 720 * relSize.pixel,
                 child: Padding(
-                  padding: EdgeInsets.all(10 * RelSize(context).pixel),
+                  padding: EdgeInsets.all(10 * relSize.pixel),
                   child: Flex(
                     direction: Axis.horizontal,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,9 +208,16 @@ class _NotTyperacerState extends State<NotTyperacer> {
                               TextSpan(
                                 text: correct,
                                 style: TextStyle(
-                                  color: Colors.green.shade700,
-                                  fontSize: 32 * RelSize(context).pixel,
-                                  backgroundColor: Colors.green.shade200,
+                                  color: combo >= comboStart
+                                      ? comboColors[(combo - comboStart) %
+                                          comboColors.length]
+                                      : Colors.green.shade700,
+                                  fontSize: 32 * relSize.pixel,
+                                  backgroundColor: combo >= comboStart
+                                      ? comboColors[(combo - comboStart) %
+                                              comboColors.length]
+                                          .withAlpha(100)
+                                      : Colors.green.shade200,
                                   fontFamily: "Hack",
                                 ),
                               ),
@@ -215,7 +225,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
                                 text: wrong,
                                 style: TextStyle(
                                   color: Colors.red.shade700,
-                                  fontSize: 32 * RelSize(context).pixel,
+                                  fontSize: 32 * relSize.pixel,
                                   backgroundColor: Colors.red.shade200,
                                   fontFamily: "Hack",
                                 ),
@@ -225,7 +235,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
                                 style: TextStyle(
                                   color: Colors.black,
                                   backgroundColor: Colors.grey.shade200,
-                                  fontSize: 32 * RelSize(context).pixel,
+                                  fontSize: 32 * relSize.pixel,
                                   fontFamily: "Hack",
                                 ),
                               ),
@@ -240,17 +250,17 @@ class _NotTyperacerState extends State<NotTyperacer> {
             ),
             !gameStarted
                 ? Positioned(
-                    bottom: 0,
+                    bottom: 120 * relSize.pixel,
                     child: Container(
                       color: Colors.white,
-                      width: 1080 * RelSize(context).pixel,
-                      height: 720 * RelSize(context).pixel,
+                      width: 1080 * relSize.pixel,
+                      height: 720 * relSize.pixel,
                       child: Center(
                         child: Text(
                           "Press ${text[0]} to start",
                           style: TextStyle(
                             color: Colors.black,
-                            fontSize: 32 * RelSize(context).pixel,
+                            fontSize: 32 * relSize.pixel,
                             fontFamily: "Hack",
                           ),
                         ),
@@ -258,13 +268,47 @@ class _NotTyperacerState extends State<NotTyperacer> {
                     ),
                   )
                 : Container(),
-            gameOver
+            gameStarted && !gameOver
                 ? Positioned(
                     bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: AnimatedDefaultTextStyle(
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: (combo >= comboStart
+                                ? 32 +
+                                    4 * sqrt(min(combo, 100)) +
+                                    3 * sqrt(min(wpm, 250))
+                                : 0) *
+                            relSize.pixel,
+                      ),
+                      duration: relSize.isResizing
+                          ? const Duration(
+                              milliseconds: 0,
+                            )
+                          : Duration(
+                              milliseconds: 8000 ~/ (16 + sqrt(max(wpm, 250))),
+                            ),
+                      curve: const Cubic(.5, 0, .6, 2),
+                      child: Text(
+                        combo < 1000 ? "Combo: $combo" : "Combo: 999+",
+                        style: TextStyle(
+                          color: comboColors[
+                              (combo - comboStart) % comboColors.length],
+                          fontFamily: "Hack",
+                        ),
+                      ),
+                    ),
+                  )
+                : Container(),
+            gameOver
+                ? Positioned(
+                    bottom: 120 * relSize.pixel,
                     child: Container(
                       color: Colors.white,
-                      width: 1080 * RelSize(context).pixel,
-                      height: 720 * RelSize(context).pixel,
+                      width: 1080 * relSize.pixel,
+                      height: 720 * relSize.pixel,
                       child: Center(
                         child: RichText(
                           textAlign: TextAlign.center,
@@ -274,8 +318,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
                                 text: reaction.text,
                                 style: TextStyle(
                                   color: reaction.color,
-                                  fontSize: reaction.fontSize *
-                                      RelSize(context).pixel,
+                                  fontSize: reaction.fontSize * relSize.pixel,
                                   fontFamily: "Hack",
                                 ),
                               ),
@@ -283,7 +326,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
                                 text: "\n\nPress Space to play a new game",
                                 style: TextStyle(
                                   color: Colors.black,
-                                  fontSize: 32 * RelSize(context).pixel,
+                                  fontSize: 32 * relSize.pixel,
                                   fontFamily: "Hack",
                                 ),
                               ),
@@ -303,8 +346,8 @@ class _NotTyperacerState extends State<NotTyperacer> {
                 },
                 focusNode: focusNode,
                 child: SizedBox(
-                  width: 1080 * RelSize(context).pixel,
-                  height: 720 * RelSize(context).pixel,
+                  width: 1080 * relSize.pixel,
+                  height: 720 * relSize.pixel,
                   child: TextField(
                     enableInteractiveSelection: false,
                     maxLines: 2,
@@ -321,29 +364,32 @@ class _NotTyperacerState extends State<NotTyperacer> {
                       }
                       //start
                       if (!gameStarted &&
-                          value.replaceFirst("`", "") == text[0]) {
+                          value.replaceFirst("`", "")[0] == text[0]) {
                         setGameStart();
                       }
                       //restart
                       if (gameStarted &&
                           gameOver &&
-                          value.replaceFirst("`", "") == " ") {
+                          value.replaceFirst("`", "")[0] == " ") {
                         reset();
                       }
                       //update and gameover
                       if (gameStarted && !gameOver) {
                         if (wronglen == 0) {
-                          if (value.replaceFirst("`", "") == text[correctlen] ||
+                          if (value.replaceFirst("`", "")[0] ==
+                                  text[correctlen] ||
                               text[correctlen] == "\n" &&
-                                  value.replaceFirst("`", "") == " ") {
+                                  value.replaceFirst("`", "")[0] == " ") {
                             totalPresses++;
                             correctlen++;
+                            combo++;
                             if (correctlen == text.length) {
                               setGameOver();
                             }
                           } else if (value.isNotEmpty) {
                             totalPresses++;
                             wronglen++;
+                            combo = 0;
                           }
                         } else {
                           if (value.isEmpty) {
@@ -380,7 +426,8 @@ class _NotTyperacerState extends State<NotTyperacer> {
 
 class Cron extends StatefulWidget {
   final Stopwatch stopwatch;
-  const Cron({super.key, required this.stopwatch});
+  final RelSize relSize;
+  const Cron({super.key, required this.stopwatch, required this.relSize});
 
   @override
   State<Cron> createState() => _CronState();
@@ -406,14 +453,14 @@ class _CronState extends State<Cron> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(top: 30 * RelSize(context).pixel),
+      padding: EdgeInsets.only(top: 30 * widget.relSize.pixel),
       child: Center(
         heightFactor: 0,
         child: Text(
           "${(widget.stopwatch.elapsedMilliseconds / 1000).toStringAsFixed(2)}s",
           style: TextStyle(
             color: Colors.white,
-            fontSize: 32 * RelSize(context).pixel,
+            fontSize: 32 * widget.relSize.pixel,
             fontFamily: "Hack",
           ),
         ),

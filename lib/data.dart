@@ -105,7 +105,8 @@ const List<String> entries = [
 
 const List<String> debugText = [
   "  a",
-  "...",
+  ".....................................................................",
+  "                                                                                                                                                                                                                                 ",
 ];
 
 class Reaction {
@@ -181,7 +182,7 @@ const Map<int, Map<int, List<Reaction>>> reactions = {
     100: [
       Reaction("You're a typing legend, keep up the amazing work!"),
       Reaction("Incredible work on both speed and accuracy, well done!"),
-      Reaction("⭐", 128),
+      Reaction("⭐", 128, Colors.yellow),
     ],
   },
   160: {
@@ -208,3 +209,19 @@ const Map<int, Map<int, List<Reaction>>> reactions = {
     ],
   },
 };
+
+const comboStart = 10;
+const List<Color> comboColors = [
+  Color.fromARGB(255, 76, 175, 79),
+  Color.fromARGB(255, 0, 150, 135),
+  Color.fromARGB(255, 25, 118, 210),
+  Color.fromARGB(255, 95, 65, 180),
+  Color.fromARGB(255, 155, 39, 176),
+  Color.fromARGB(255, 170, 50, 160),
+  Color.fromARGB(255, 190, 70, 130),
+  Color.fromARGB(255, 233, 90, 80),
+  Color.fromARGB(255, 251, 138, 0),
+  Color.fromARGB(255, 251, 192, 30),
+  Color.fromARGB(255, 200, 188, 50),
+  Color.fromARGB(255, 140, 183, 60),
+];
