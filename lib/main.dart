@@ -123,10 +123,9 @@ class _NotTyperacerState extends State<NotTyperacer> {
   @override
   Widget build(BuildContext context) {
     var correct = text.substring(0, correctlen);
-    int words = correct.split(" ").length;
     double wpm = 0;
     if (stopwatch.elapsedMilliseconds > 100) {
-      wpm = 60000 * words / stopwatch.elapsedMilliseconds;
+      wpm = 12000 * correct.length / stopwatch.elapsedMilliseconds;
     }
     double acc = 0;
     if (totalPresses > 0) {
