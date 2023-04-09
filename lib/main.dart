@@ -52,14 +52,16 @@ class _NotTyperacerState extends State<NotTyperacer> {
         Random().nextInt(reactions[wpm]?[acc]!.length ?? 0)];
   }
 
-  void setGameOver() {
+  void setGameOver(double wpm, double acc) {
     gameStarted = true;
     gameOver = true;
+    combo = 0;
+    reaction = _getReaction(wpm.toInt(), acc.toInt());
     stopwatch.stop();
     setState(() {});
   }
 
-  void reset() {
+  void reset(double wpm) {
     gameOver = false;
     gameStarted = false;
     correctlen = 0;
@@ -67,7 +69,9 @@ class _NotTyperacerState extends State<NotTyperacer> {
     totalPresses = 0;
     combo = 0;
     stopwatch.reset();
-    text = entries[Random().nextInt(entries.length)];
+    text = wpm < 60
+        ? entries[Random().nextInt(entries.length)]
+        : difficultEntries[Random().nextInt(entries.length)];
     if (kDebugMode) {
       debugIndex = debugIndex % debugText.length;
       text = debugText[debugIndex++];
@@ -94,19 +98,27 @@ class _NotTyperacerState extends State<NotTyperacer> {
     super.initState();
   }
 
+  //game data
+  Stopwatch stopwatch = Stopwatch();
   String text = "";
+  Reaction reaction = const Reaction("");
   int totallen = 10;
   int correctlen = 0;
   int wronglen = 0;
   int totalPresses = 0;
   int combo = 0;
-  int debugIndex = 0;
-  Stopwatch stopwatch = Stopwatch();
   bool gameOver = false;
   bool gameStarted = false;
-  FocusNode focusNode = FocusNode();
-  FocusNode textFocusNode = FocusNode();
+  //text getter(s)
   TextEditingController textController = TextEditingController(text: "`");
+  FocusNode textFocusNode = FocusNode();
+  FocusNode focusNode = FocusNode();
+  //settings
+  bool comboFX = true;
+  bool startingLetter = true;
+  bool finalMessages = true;
+  //debug
+  int debugIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -122,10 +134,6 @@ class _NotTyperacerState extends State<NotTyperacer> {
     }
     var wrong = text.substring(correctlen, correctlen + wronglen);
     var remaining = text.substring(correctlen + wronglen);
-    Reaction reaction = const Reaction("");
-    if (gameOver) {
-      reaction = _getReaction(wpm.toInt(), acc.toInt());
-    }
     RelSize relSize = RelSize(context);
     return Center(
       widthFactor: relSize.vw / relSize.vmin,
@@ -182,10 +190,22 @@ class _NotTyperacerState extends State<NotTyperacer> {
             ),
             Positioned(
               top: 160 * relSize.pixel,
-              left: 1000 * relSize.pixel * correctlen / totallen,
-              child: Icon(
-                Icons.abc,
-                size: relSize.pixel * 80,
+              left: 1000 * relSize.pixel * correctlen / totallen -
+                  20 * relSize.pixel,
+              child: Container(
+                width: relSize.pixel * 120,
+                height: relSize.pixel * 81,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(relSize.pixel * 20),
+                ),
+                child: Icon(
+                  Icons.abc,
+                  size: relSize.pixel * 80,
+                  color: combo >= comboStart && comboFX
+                      ? comboColors[(combo - comboStart) % comboColors.length]
+                      : Colors.black,
+                ),
               ),
             ),
             Positioned(
@@ -208,25 +228,27 @@ class _NotTyperacerState extends State<NotTyperacer> {
                               TextSpan(
                                 text: correct,
                                 style: TextStyle(
-                                  color: combo >= comboStart
+                                  color: combo >= comboStart && comboFX
                                       ? comboColors[(combo - comboStart) %
                                           comboColors.length]
-                                      : Colors.green.shade700,
+                                      : const Color.fromARGB(255, 56, 142, 60),
                                   fontSize: 32 * relSize.pixel,
-                                  backgroundColor: combo >= comboStart
+                                  backgroundColor: combo >= comboStart &&
+                                          comboFX
                                       ? comboColors[(combo - comboStart) %
                                               comboColors.length]
-                                          .withAlpha(100)
-                                      : Colors.green.shade200,
+                                          .withAlpha(80)
+                                      : const Color.fromARGB(80, 56, 142, 60),
                                   fontFamily: "Hack",
                                 ),
                               ),
                               TextSpan(
                                 text: wrong,
                                 style: TextStyle(
-                                  color: Colors.red.shade700,
+                                  color: const Color.fromARGB(255, 211, 47, 47),
                                   fontSize: 32 * relSize.pixel,
-                                  backgroundColor: Colors.red.shade200,
+                                  backgroundColor:
+                                      const Color.fromARGB(80, 211, 47, 47),
                                   fontFamily: "Hack",
                                 ),
                               ),
@@ -234,7 +256,8 @@ class _NotTyperacerState extends State<NotTyperacer> {
                                 text: remaining,
                                 style: TextStyle(
                                   color: Colors.black,
-                                  backgroundColor: Colors.grey.shade200,
+                                  backgroundColor:
+                                      const Color.fromARGB(20, 0, 0, 0),
                                   fontSize: 32 * relSize.pixel,
                                   fontFamily: "Hack",
                                 ),
@@ -276,7 +299,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
                     child: AnimatedDefaultTextStyle(
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: (combo >= comboStart
+                        fontSize: (combo >= comboStart && comboFX
                                 ? 32 +
                                     4 * sqrt(min(combo, 100)) +
                                     3 * sqrt(min(wpm, 250))
@@ -295,10 +318,48 @@ class _NotTyperacerState extends State<NotTyperacer> {
                         combo < 1000 ? "Combo: $combo" : "Combo: 999+",
                         style: TextStyle(
                           color: comboColors[
-                              (combo - comboStart) % comboColors.length],
+                              (combo >= comboStart ? combo - comboStart : 0) %
+                                  comboColors.length],
                           fontFamily: "Hack",
                         ),
                       ),
+                    ),
+                  )
+                : Container(),
+            !gameStarted
+                ? Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Setting(
+                          relSize: relSize,
+                          text: "Enable ComboFX",
+                          val: comboFX,
+                          setVal: (val) => setState(() {
+                            comboFX = val ?? true;
+                          }),
+                        ),
+                        Setting(
+                          relSize: relSize,
+                          text: "Type the starting letter",
+                          val: startingLetter,
+                          setVal: (val) => setState(() {
+                            startingLetter = val ?? true;
+                          }),
+                        ),
+                        Setting(
+                          relSize: relSize,
+                          text: "Show final messages",
+                          val: finalMessages,
+                          setVal: (val) => setState(() {
+                            finalMessages = val ?? true;
+                          }),
+                        ),
+                      ],
                     ),
                   )
                 : Container(),
@@ -313,24 +374,37 @@ class _NotTyperacerState extends State<NotTyperacer> {
                         child: RichText(
                           textAlign: TextAlign.center,
                           text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: reaction.text,
-                                style: TextStyle(
-                                  color: reaction.color,
-                                  fontSize: reaction.fontSize * relSize.pixel,
-                                  fontFamily: "Hack",
-                                ),
-                              ),
-                              TextSpan(
-                                text: "\n\nPress Space to play a new game",
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 32 * relSize.pixel,
-                                  fontFamily: "Hack",
-                                ),
-                              ),
-                            ],
+                            children: finalMessages
+                                ? [
+                                    TextSpan(
+                                      text: reaction.text,
+                                      style: TextStyle(
+                                        color: reaction.color,
+                                        fontSize:
+                                            reaction.fontSize * relSize.pixel,
+                                        fontFamily: "Hack",
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text:
+                                          "\n\nPress Space to play a new game",
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 32 * relSize.pixel,
+                                        fontFamily: "Hack",
+                                      ),
+                                    ),
+                                  ]
+                                : [
+                                    TextSpan(
+                                      text: "Press Space to play a new game",
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 32 * relSize.pixel,
+                                        fontFamily: "Hack",
+                                      ),
+                                    ),
+                                  ],
                           ),
                         ),
                       ),
@@ -338,7 +412,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
                   )
                 : Container(),
             Positioned(
-              bottom: 0,
+              bottom: 120 * relSize.pixel,
               child: KeyboardListener(
                 onKeyEvent: (_) {
                   textController.selection = TextSelection.collapsed(
@@ -366,12 +440,17 @@ class _NotTyperacerState extends State<NotTyperacer> {
                       if (!gameStarted &&
                           value.replaceFirst("`", "")[0] == text[0]) {
                         setGameStart();
+                        if (!startingLetter) {
+                          textController.text = "`";
+                          setState(() {});
+                          return;
+                        }
                       }
                       //restart
                       if (gameStarted &&
                           gameOver &&
                           value.replaceFirst("`", "")[0] == " ") {
-                        reset();
+                        reset(wpm);
                       }
                       //update and gameover
                       if (gameStarted && !gameOver) {
@@ -384,7 +463,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
                             correctlen++;
                             combo++;
                             if (correctlen == text.length) {
-                              setGameOver();
+                              setGameOver(wpm, acc);
                             }
                           } else if (value.isNotEmpty) {
                             totalPresses++;
@@ -401,9 +480,9 @@ class _NotTyperacerState extends State<NotTyperacer> {
                             }
                           }
                         }
-                        setState(() {});
                       }
                       textController.text = "`";
+                      setState(() {});
                     },
                     controller: textController,
                     decoration: const InputDecoration(
@@ -465,6 +544,51 @@ class _CronState extends State<Cron> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class Setting extends StatelessWidget {
+  final RelSize relSize;
+  final String text;
+  final bool val;
+  final void Function(bool?) setVal;
+  const Setting(
+      {super.key,
+      required this.relSize,
+      required this.text,
+      required this.val,
+      required this.setVal});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Text(
+          text,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24 * relSize.pixel,
+            fontFamily: "Hack",
+          ),
+        ),
+        SizedBox(
+          width: 64 * relSize.pixel,
+          height: 64 * relSize.pixel,
+          child: Transform.scale(
+            scale: 2 * relSize.pixel,
+            child: Checkbox(
+              checkColor: Colors.black,
+              fillColor: MaterialStateColor.resolveWith(
+                (states) => Colors.white,
+              ),
+              value: val,
+              onChanged: setVal,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
