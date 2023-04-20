@@ -90,3 +90,6 @@ flutter:
     - family: Hack
       fonts:
         - asset: assets/hack.ttf
+    - family: Emoji
+      fonts:
+        - asset: assets/emoji.ttf

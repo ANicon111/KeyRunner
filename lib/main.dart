@@ -52,12 +52,17 @@ class _NotTyperacerState extends State<NotTyperacer> {
         Random().nextInt(reactions[wpm]?[acc]!.length ?? 0)];
   }
 
-  void setGameOver(double wpm, double acc) {
+  void setGameOver() {
+    int wpm = 12000 * correctlen ~/ stopwatch.elapsedMilliseconds;
+    int acc = correctlen * 100 ~/ totalPresses;
     gameStarted = true;
     gameOver = true;
     combo = 0;
-    reaction = _getReaction(wpm.toInt(), acc.toInt());
+    updateComboFontSize;
+    reaction = _getReaction(wpm, acc);
     stopwatch.stop();
+    timer?.cancel();
+    timer = null;
     setState(() {});
   }
 
@@ -68,6 +73,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
     wronglen = 0;
     totalPresses = 0;
     combo = 0;
+    updateComboFontSize;
     stopwatch.reset();
     text = wpm < 60
         ? entries[Random().nextInt(entries.length)]
@@ -84,7 +90,20 @@ class _NotTyperacerState extends State<NotTyperacer> {
     gameOver = false;
     gameStarted = true;
     stopwatch.start();
+    timer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
+      updateComboFontSize;
+      setState(() {});
+    });
     setState(() {});
+  }
+
+  void get updateComboFontSize {
+    if (stopwatch.elapsedMilliseconds > 50) {
+      double wpm = 12000 * correctlen / stopwatch.elapsedMilliseconds;
+      comboFontSize = (combo >= comboStart && comboFX
+          ? 32 + 4 * sqrt(min(combo, 100)) + 3 * sqrt(min(wpm, 250))
+          : 0);
+    }
   }
 
   @override
@@ -98,8 +117,17 @@ class _NotTyperacerState extends State<NotTyperacer> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    timer?.cancel();
+    timer = null;
+    stopwatch.stop();
+    super.dispose();
+  }
+
   //game data
   Stopwatch stopwatch = Stopwatch();
+  Timer? timer;
   String text = "";
   Reaction reaction = const Reaction("");
   int totallen = 10;
@@ -107,6 +135,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
   int wronglen = 0;
   int totalPresses = 0;
   int combo = 0;
+  double comboFontSize = 0;
   bool gameOver = false;
   bool gameStarted = false;
   //text getter(s)
@@ -122,9 +151,10 @@ class _NotTyperacerState extends State<NotTyperacer> {
 
   @override
   Widget build(BuildContext context) {
+    print("flicker...?");
     var correct = text.substring(0, correctlen);
     double wpm = 0;
-    if (stopwatch.elapsedMilliseconds > 100) {
+    if (stopwatch.elapsedMilliseconds > 50) {
       wpm = 12000 * correct.length / stopwatch.elapsedMilliseconds;
     }
     double acc = 0;
@@ -298,12 +328,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
                     child: AnimatedDefaultTextStyle(
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: (combo >= comboStart && comboFX
-                                ? 32 +
-                                    4 * sqrt(min(combo, 100)) +
-                                    3 * sqrt(min(wpm, 250))
-                                : 0) *
-                            relSize.pixel,
+                        fontSize: comboFontSize * relSize.pixel,
                       ),
                       duration: relSize.isResizing
                           ? const Duration(
@@ -381,7 +406,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
                                         color: reaction.color,
                                         fontSize:
                                             reaction.fontSize * relSize.pixel,
-                                        fontFamily: "Hack",
+                                        fontFamily: "Emoji",
                                       ),
                                     ),
                                     TextSpan(
@@ -454,20 +479,26 @@ class _NotTyperacerState extends State<NotTyperacer> {
                       //update and gameover
                       if (gameStarted && !gameOver) {
                         if (wronglen == 0) {
-                          if (value.replaceFirst("`", "")[0] ==
-                                  text[correctlen] ||
-                              text[correctlen] == "\n" &&
-                                  value.replaceFirst("`", "")[0] == " ") {
-                            totalPresses++;
-                            correctlen++;
-                            combo++;
-                            if (correctlen == text.length) {
-                              setGameOver(wpm, acc);
+                          if (value.isNotEmpty) {
+                            if (value.replaceFirst("`", "")[0] ==
+                                    text[correctlen] ||
+                                text[correctlen] == "\n" &&
+                                    value.replaceFirst("`", "")[0] == " ") {
+                              totalPresses++;
+                              correctlen++;
+                              combo++;
+                              if (combo == comboStart) {
+                                updateComboFontSize;
+                              }
+                              if (correctlen == text.length) {
+                                setGameOver();
+                              }
+                            } else if (value.isNotEmpty) {
+                              totalPresses++;
+                              wronglen++;
+                              combo = 0;
+                              updateComboFontSize;
                             }
-                          } else if (value.isNotEmpty) {
-                            totalPresses++;
-                            wronglen++;
-                            combo = 0;
                           }
                         } else {
                           if (value.isEmpty) {

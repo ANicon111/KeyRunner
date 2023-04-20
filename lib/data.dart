@@ -270,7 +270,7 @@ const Map<int, Map<int, List<Reaction>>> reactions = {
     ],
     100: [
       Reaction("You're a typing pro, keep up the good work!"),
-      Reaction("🔥", 128),
+      Reaction("🔥", 128, Colors.orange),
     ],
   },
   120: {
@@ -300,7 +300,7 @@ const Map<int, Map<int, List<Reaction>>> reactions = {
     100: [
       Reaction("You're a typing god, keep up the amazing work!"),
       Reaction("Unbelievable work on both speed and accuracy, well done!"),
-      Reaction("👑", 192),
+      Reaction("👑", 192, Colors.yellow),
     ],
   },
   250: {
@@ -308,7 +308,7 @@ const Map<int, Map<int, List<Reaction>>> reactions = {
       Reaction("How did your friggin bot make any mistakes? 🤣"),
     ],
     100: [
-      Reaction("🧐", 128),
+      Reaction("🧐", 128, Colors.blue),
     ],
   },
 };
