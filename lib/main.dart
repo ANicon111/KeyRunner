@@ -328,7 +328,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
                 : Container(),
             gameStarted && !gameOver
                 ? Positioned(
-                    bottom: 0,
+                    bottom: -comboFontSize / 3,
                     left: 0,
                     right: 0,
                     child: AnimatedDefaultTextStyle(
