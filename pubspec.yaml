@@ -93,4 +93,6 @@ flutter:
         - asset: assets/notosanskannada.ttf
     - family: Emoji
       fonts:
+        - asset: assets/notosans.ttf
+        - asset: assets/notosanskannada.ttf
         - asset: assets/emoji.ttf
