@@ -53,7 +53,10 @@ class _NotTyperacerState extends State<NotTyperacer> {
   }
 
   void setGameOver() {
-    int wpm = 12000 * correctlen ~/ stopwatch.elapsedMilliseconds;
+    int wpm = 250;
+    if (stopwatch.elapsedMilliseconds > 50) {
+      wpm = 12000 * correctlen ~/ stopwatch.elapsedMilliseconds;
+    }
     int acc = correctlen * 100 ~/ totalPresses;
     gameStarted = true;
     gameOver = true;
@@ -90,7 +93,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
     gameOver = false;
     gameStarted = true;
     stopwatch.start();
-    timer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
+    timer ??= Timer.periodic(const Duration(milliseconds: 500), (timer) {
       updateComboFontSize;
       setState(() {});
     });
@@ -101,7 +104,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
     if (stopwatch.elapsedMilliseconds > 50) {
       double wpm = 12000 * correctlen / stopwatch.elapsedMilliseconds;
       comboFontSize = (combo >= comboStart && comboFX
-          ? 32 + 4 * sqrt(min(combo, 100)) + 3 * sqrt(min(wpm, 250))
+          ? 24 + 4 * sqrt(min(combo, 100)) + 3 * sqrt(min(wpm, 250))
           : 0);
     }
   }
@@ -151,11 +154,12 @@ class _NotTyperacerState extends State<NotTyperacer> {
 
   @override
   Widget build(BuildContext context) {
-    print("flicker...?");
     var correct = text.substring(0, correctlen);
     double wpm = 0;
     if (stopwatch.elapsedMilliseconds > 50) {
       wpm = 12000 * correct.length / stopwatch.elapsedMilliseconds;
+    } else if (gameOver) {
+      wpm = 69420;
     }
     double acc = 0;
     if (totalPresses > 0) {
@@ -184,7 +188,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 32 * relSize.pixel,
-                  fontFamily: "Hack",
+                  fontFamily: "NotoSans",
                 ),
               ),
             ),
@@ -196,7 +200,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 32 * relSize.pixel,
-                  fontFamily: "Hack",
+                  fontFamily: "NotoSans",
                 ),
               ),
             ),
@@ -261,24 +265,24 @@ class _NotTyperacerState extends State<NotTyperacer> {
                                       ? comboColors[(combo - comboStart) %
                                           comboColors.length]
                                       : const Color.fromARGB(255, 56, 142, 60),
-                                  fontSize: 32 * relSize.pixel,
+                                  fontSize: 40 * relSize.pixel,
                                   backgroundColor: combo >= comboStart &&
                                           comboFX
                                       ? comboColors[(combo - comboStart) %
                                               comboColors.length]
                                           .withAlpha(80)
                                       : const Color.fromARGB(80, 56, 142, 60),
-                                  fontFamily: "Hack",
+                                  fontFamily: "NotoSans",
                                 ),
                               ),
                               TextSpan(
                                 text: wrong,
                                 style: TextStyle(
                                   color: const Color.fromARGB(255, 211, 47, 47),
-                                  fontSize: 32 * relSize.pixel,
+                                  fontSize: 40 * relSize.pixel,
                                   backgroundColor:
                                       const Color.fromARGB(80, 211, 47, 47),
-                                  fontFamily: "Hack",
+                                  fontFamily: "NotoSans",
                                 ),
                               ),
                               TextSpan(
@@ -287,8 +291,8 @@ class _NotTyperacerState extends State<NotTyperacer> {
                                   color: Colors.black,
                                   backgroundColor:
                                       const Color.fromARGB(20, 0, 0, 0),
-                                  fontSize: 32 * relSize.pixel,
-                                  fontFamily: "Hack",
+                                  fontSize: 40 * relSize.pixel,
+                                  fontFamily: "NotoSans",
                                 ),
                               ),
                             ],
@@ -312,8 +316,8 @@ class _NotTyperacerState extends State<NotTyperacer> {
                           "Press ${text[0]} to start",
                           style: TextStyle(
                             color: Colors.black,
-                            fontSize: 32 * relSize.pixel,
-                            fontFamily: "Hack",
+                            fontSize: 48 * relSize.pixel,
+                            fontFamily: "NotoSans",
                           ),
                         ),
                       ),
@@ -344,7 +348,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
                           color: comboColors[
                               (combo >= comboStart ? combo - comboStart : 0) %
                                   comboColors.length],
-                          fontFamily: "Hack",
+                          fontFamily: "NotoSans",
                         ),
                       ),
                     ),
@@ -414,8 +418,8 @@ class _NotTyperacerState extends State<NotTyperacer> {
                                           "\n\nPress Space to play a new game",
                                       style: TextStyle(
                                         color: Colors.black,
-                                        fontSize: 32 * relSize.pixel,
-                                        fontFamily: "Hack",
+                                        fontSize: 48 * relSize.pixel,
+                                        fontFamily: "NotoSans",
                                       ),
                                     ),
                                   ]
@@ -424,8 +428,8 @@ class _NotTyperacerState extends State<NotTyperacer> {
                                       text: "Press Space to play a new game",
                                       style: TextStyle(
                                         color: Colors.black,
-                                        fontSize: 32 * relSize.pixel,
-                                        fontFamily: "Hack",
+                                        fontSize: 48 * relSize.pixel,
+                                        fontFamily: "NotoSans",
                                       ),
                                     ),
                                   ],
@@ -570,7 +574,7 @@ class _CronState extends State<Cron> {
           style: TextStyle(
             color: Colors.white,
             fontSize: 32 * widget.relSize.pixel,
-            fontFamily: "Hack",
+            fontFamily: "NotoSans",
           ),
         ),
       ),
@@ -600,7 +604,7 @@ class Setting extends StatelessWidget {
           style: TextStyle(
             color: Colors.white,
             fontSize: 24 * relSize.pixel,
-            fontFamily: "Hack",
+            fontFamily: "NotoSans",
           ),
         ),
         SizedBox(

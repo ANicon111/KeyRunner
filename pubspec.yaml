@@ -87,9 +87,9 @@ flutter:
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
   fonts:
-    - family: Hack
+    - family: NotoSans
       fonts:
-        - asset: assets/hack.ttf
+        - asset: assets/notosans.ttf
     - family: Emoji
       fonts:
         - asset: assets/emoji.ttf
