@@ -96,3 +96,6 @@ flutter:
         - asset: assets/notosans.ttf
         - asset: assets/notosanskannada.ttf
         - asset: assets/emoji.ttf
+    - family: Roboto
+      fonts:
+        - asset: assets/notosans.ttf
