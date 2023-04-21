@@ -308,7 +308,7 @@ const Map<int, Map<int, List<Reaction>>> reactions = {
       Reaction("How did your friggin bot make any mistakes? 🤣"),
     ],
     100: [
-      Reaction("🧐", 128, Colors.blue),
+      Reaction("🧐", 128, Colors.orange),
     ],
   },
 };
