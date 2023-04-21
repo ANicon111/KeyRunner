@@ -85,6 +85,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
       debugIndex = debugIndex % debugText.length;
       text = debugText[debugIndex++];
     }
+    if (text.isEmpty) text = ".";
     totallen = text.length;
     setState(() {});
   }
@@ -158,6 +159,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
     double wpm = 0;
     if (stopwatch.elapsedMilliseconds > 50) {
       wpm = 12000 * correct.length / stopwatch.elapsedMilliseconds;
+      if (wpm > 69420) wpm = 69420;
     } else if (gameOver) {
       wpm = 69420;
     }
@@ -182,7 +184,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
             ),
             Positioned(
               top: 90 * relSize.pixel,
-              left: 350 * relSize.pixel,
+              left: 300 * relSize.pixel,
               child: Text(
                 "WPM:${wpm.toStringAsFixed(0)}",
                 style: TextStyle(
@@ -194,7 +196,7 @@ class _NotTyperacerState extends State<NotTyperacer> {
             ),
             Positioned(
               top: 90 * relSize.pixel,
-              right: 350 * relSize.pixel,
+              right: 300 * relSize.pixel,
               child: Text(
                 "ACC:${acc.toStringAsFixed(2)}%",
                 style: TextStyle(
